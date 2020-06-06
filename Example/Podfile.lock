@@ -1,0 +1,16 @@
+PODS:
+  - Hellfire (0.0.17)
+
+DEPENDENCIES:
+  - Hellfire (from `../`)
+
+EXTERNAL SOURCES:
+  Hellfire:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Hellfire: b19aad3bfaed205954ed37acccd1ef4da9561b10
+
+PODFILE CHECKSUM: 0828ce761dfa31df5201d50fbe3bbf5ddc7ed0a0
+
+COCOAPODS: 1.9.1
