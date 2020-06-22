@@ -32,6 +32,7 @@
 		CF3F69019A4B63291778D66B2140DD1A /* Hellfire-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 082BCBF886AF6E27199C5ED0FF2004A6 /* Hellfire-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E0B11AE62D44049E672AA59645B8778A /* Pods-Hellfire_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 830180C6618EC58D07AADB862FBD3F81 /* Pods-Hellfire_Tests-dummy.m */; };
 		E94BA308212C806053886DB6F9290B2A /* DataRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFC07DD45109AED81B0699BEB3C9F2E6 /* DataRequest.swift */; };
+		EBBC81A924A0311000F68777 /* DataResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBBC81A824A0311000F68777 /* DataResponse.swift */; };
 		FAE2928FB6B9A073127D1DC92E8361DB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3212113385A8FBBDB272BD23C409FF61 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
@@ -100,6 +101,7 @@
 		E03C037BCE47CB04F87D64CF2EA32A84 /* ReachabilityStatus.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReachabilityStatus.swift; sourceTree = "<group>"; };
 		E4F162D2D6D1DE5C399EED6CB3B406E6 /* DiskCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiskCache.swift; sourceTree = "<group>"; };
 		EA3A2E0370F6C4ED1A5ADDAEFF7C9239 /* Pods-Hellfire_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Hellfire_Example-umbrella.h"; sourceTree = "<group>"; };
+		EBBC81A824A0311000F68777 /* DataResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataResponse.swift; sourceTree = "<group>"; };
 		EFC07DD45109AED81B0699BEB3C9F2E6 /* DataRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DataRequest.swift; sourceTree = "<group>"; };
 		F10686A184680033C4F9EAC0BE8A1655 /* Pods-Hellfire_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Hellfire_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
 		F9B89225CC0C2342557C97FE5DD00A14 /* Hellfire.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Hellfire.release.xcconfig; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 		40A73E868FD395E9F9B1ACA9C1483DCA /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				EBBC81A824A0311000F68777 /* DataResponse.swift */,
 				EFC07DD45109AED81B0699BEB3C9F2E6 /* DataRequest.swift */,
 				907B9B530EF49FD032AC4EA2342CCF1E /* HTTPCode.swift */,
 				5958E0F52EB44D9ACFC1B540073593E2 /* HTTPHeader.swift */,
@@ -481,6 +484,7 @@
 				E94BA308212C806053886DB6F9290B2A /* DataRequest.swift in Sources */,
 				0D012759086A29DC16079D2C9C7E92C9 /* DiskCache.swift in Sources */,
 				5AAA3CF0622B89270E0E38213E40F0A2 /* FileManager+Extension.swift in Sources */,
+				EBBC81A924A0311000F68777 /* DataResponse.swift in Sources */,
 				8977C099637D74CBEF9650A8CDAA21FF /* Hellfire-dummy.m in Sources */,
 				2A583D34DC4640B04F815BF2DBB1F2EC /* HTTPCode.swift in Sources */,
 				3F802F09D3F6CEDB75A51EFC782DDBE3 /* HTTPHeader.swift in Sources */,

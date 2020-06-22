@@ -8,13 +8,13 @@
 
 import Foundation
 
-///The basic request object supplying the minimal information for a network request.  Headers are set later by a call to the ServiceInterfaceSessionDelegate.
+///The basic request object supplying the minimal information for a network request.  Headers are set later by a delegate call to ServiceInterfaceSessionDelegate implemented by the application.
 public struct DataRequest {
     
     public init(url: URL,
                 method: HTTPMethod,
                 cachePolicyType: CachePolicyType = .doNotCache,
-                timeoutInterval: TimeInterval = TimeInterval(50),
+                timeoutInterval: TimeInterval = TimeInterval(30),
                 httpBody: Data? = nil,
                 contentType: String = "application/json") {
         self.url = url
@@ -25,21 +25,21 @@ public struct DataRequest {
         self.contentType = contentType
     }
     
-    /// Gets the url object.
+    /// Gets the url for the request.
     public let url: URL
     
-    /// Gets the HTTP method
+    /// Gets the HTTP method for the request.
     public let method: HTTPMethod
     
-    /// Gets the CachePolicyType.
+    /// Gets the CachePolicyType to be used on the response.
     public let cachePolicyType: CachePolicyType
     
-    /// Gets the timeout setting for the request in seconds.  Default is 50 seconds if left nil.
+    /// Gets the connection timeout for the request in seconds.  Default is 30 seconds if parameter is not passed in on the initializer.
     public let timeoutInterval: TimeInterval
     
     /// Gets the Request http body
     public let httpBody: Data?
     
-    /// Gets the content type.
+    /// Gets the content type of the request body.
     public let contentType: String
 }

@@ -25,7 +25,7 @@ public struct HTTPHeader: Hashable {
 
 extension HTTPHeader: CustomStringConvertible, CustomDebugStringConvertible {
     public var debugDescription: String {
-        return "Name:[\(self.name)]  Value:[\(self.value)]"
+        return "{ name: \"\(self.name)\"  value:\"\(self.value)\" }"
     }
     
     public var description: String {

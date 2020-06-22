@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class ServiceError {
+public class ServiceError: Error {
     
     public init(request: URLRequest, error: Error?, statusCode: StatusCode, responseBody: Data?) {
         self.request = request

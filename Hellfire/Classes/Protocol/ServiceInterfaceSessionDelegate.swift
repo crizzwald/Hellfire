@@ -14,11 +14,11 @@ public protocol ServiceInterfaceSessionDelegate: class {
     func headerCollection(forRequest dataRequest: DataRequest) -> [HTTPHeader]?
     
     ///Send the response headers to the session delegate.
-    func responseHeaders(headers: [AnyHashable : Any]?)
+    func responseHeaders(headers: [HTTPHeader], forRequest: DataRequest)
 }
 
 //Empty private protocol extension to make protocol methods optional for the delegate.
 public extension ServiceInterfaceSessionDelegate {
     func headerCollection(forRequest dataRequest: DataRequest) -> [HTTPHeader]? { return nil }
-    func responseHeaders(headers: [AnyHashable : Any]?) {}
+    func responseHeaders(headers: [HTTPHeader]) {}
 }

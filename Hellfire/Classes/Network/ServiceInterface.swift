@@ -9,9 +9,9 @@
 import Foundation
 
 public typealias RequestTaskIdentifier = Int
-public typealias DataTaskCompletion = (_ response: Data?, _ error: Error?, _ statusCode: StatusCode) -> Void
-public typealias ReachabilityHandler = (_ reachabilityStatus: ReachabilityStatus) -> Void
-public typealias ServiceErrorHandler = (_ serviceError: ServiceError) -> Void
+public typealias ReachabilityHandler = (ReachabilityStatus) -> Void
+public typealias ServiceErrorHandler = (ServiceError) -> Void
+public typealias TaskResult = (Result<DataResponse, ServiceError>) -> Void
 
 //Only one instance per app should be created.  However, rather than trying to enforce this via a singleton, its up to the app developer when to create multiple instances.  But be aware that DiskCache is still shared between all instances.  Although a unique hash insertion key will be created, storage size will be shared.
 public class ServiceInterface {
@@ -21,7 +21,7 @@ public class ServiceInterface {
     private var reachabilityManager: NetworkReachabilityManager?
     private var privateReachabilityHost: String?
     private lazy var requestCollection = RequestCollection()
-    private lazy var diskCache = DiskCache.shared()
+    private lazy var diskCache = DiskCache()
     private lazy var session: URLSession = {
         let configuration = URLSessionConfiguration.default
         let urlSession = URLSession(configuration: configuration)
@@ -48,11 +48,17 @@ public class ServiceInterface {
         return statusCode
     }
 
-    private func checkReponse(data: Data?, response: HTTPURLResponse?, error: Error?, fromRequest request: URLRequest) {
-        let statusCode = self.statusCodeForResponse(response, error: error)
-        if HTTPCode.isOk(statusCode: statusCode) { return }
+    private func responseHeaders(_ response: HTTPURLResponse?) -> [HTTPHeader] {
+        guard let headers = response?.allHeaderFields else { return [] }
+        let httpHeaders = headers.compactMap { HTTPHeader(name: "\($0.key)", value: "\($0.value)") }
+        return httpHeaders
+    }
+    
+    private func checkReponse(data: Data?, statusCode: StatusCode, error: Error?, fromRequest request: URLRequest) -> ServiceError? {
+        if HTTPCode.isOk(statusCode: statusCode) { return nil }
         let serviceError = ServiceError(request: request, error: error, statusCode: statusCode, responseBody: data)
         self.serviceErrorHandler?(serviceError)
+        return serviceError
     }
     
     private func urlRequest(fromDataRequest request: DataRequest) -> URLRequest {
@@ -71,11 +77,12 @@ public class ServiceInterface {
         return urlRequest
     }
     
-    private func isCachedResponse(forRequest request: DataRequest, completion: @escaping DataTaskCompletion) -> Bool {
+    private func hasCachedResponse(forRequest request: DataRequest, completion: @escaping TaskResult) -> Bool {
         if request.cachePolicyType != CachePolicyType.doNotCache {
             if let response = self.diskCache.getCacheDataFor(request: request) {
                 DispatchQueue.main.async {
-                    completion(response, nil, HTTPCode.ok.rawValue)
+                    let dataResponse = DataResponse(responseHeaders: [], resposeBody: response, statusCode: HTTPCode.ok.rawValue)
+                    completion(.success(dataResponse))
                 }
                 return true
             }
@@ -91,9 +98,7 @@ public class ServiceInterface {
         #endif
     }
 
-    public init() {
-        
-    }
+    public init() { }
     
     ///Gets or sets the handler for the reachability status change events.
     public var reachabilityHandler: ReachabilityHandler?
@@ -137,36 +142,41 @@ public class ServiceInterface {
     }
     
     public weak var sessionDelegate: ServiceInterfaceSessionDelegate?
-    
-    public func executeDataTask(forRequest request: DataRequest, completion: @escaping DataTaskCompletion) -> RequestTaskIdentifier? {
 
-        if isCachedResponse(forRequest: request, completion: completion) { return nil }
+    public func execute(_ request: DataRequest, completion: @escaping TaskResult) -> RequestTaskIdentifier? {
+
+        if hasCachedResponse(forRequest: request, completion: completion) { return nil }
         
         let urlRequest = self.urlRequest(fromDataRequest: request)
         let task = self.session.dataTask(with: urlRequest) { [weak self] data, response, error in
             guard let strongSelf = self else { return }
-            let httpURLResponse = response as? HTTPURLResponse
             
-            //Get the status code that best represents this reponse
+            let httpURLResponse = response as? HTTPURLResponse
+            let responseHeaders: [HTTPHeader] = strongSelf.responseHeaders(httpURLResponse)
             let statusCode = strongSelf.statusCodeForResponse(httpURLResponse, error: error)
             
-            //Store response in disk cache.  DiskCache checks cachePolicyType to see if it should indeed cache response data.
-            if let responseData = data {
+            //If call was successful and we have data, store response in disk cache.
+            if let responseData = data, HTTPCode.isOk(statusCode: statusCode), request.cachePolicyType != .doNotCache {
                 strongSelf.diskCache.cache(data: responseData, forRequest: request)
             }
             
             //Send back response headers (In the future the headers will be additionally included with the response.)
-            strongSelf.sessionDelegate?.responseHeaders(headers: httpURLResponse?.allHeaderFields)
+            strongSelf.sessionDelegate?.responseHeaders(headers: responseHeaders, forRequest: request)
             
             ///Check for error in the response.
-            strongSelf.checkReponse(data: data, response: httpURLResponse, error: error, fromRequest: urlRequest)
+            let serviceError = strongSelf.checkReponse(data: data, statusCode: statusCode, error: error, fromRequest: urlRequest)
             
             //Remove request \ task from executing tasks collection
             strongSelf.requestCollection.removeTask(forRequest: urlRequest)
             
             //Call completion block
             DispatchQueue.main.async {
-                completion(data, error, statusCode)
+                if serviceError != nil {
+                    completion(.failure(serviceError!))
+                } else {
+                    let dataResponse = DataResponse(responseHeaders: responseHeaders, resposeBody: data, statusCode: HTTPCode.ok.rawValue)
+                    completion(.success(dataResponse))
+                }
             }
         }
         

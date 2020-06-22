@@ -12,38 +12,57 @@ import Hellfire
 class ViewController: UIViewController {
 
     @IBAction func executeButton_TouchUp(_ sender: UIButton) {
-        print(self.serviceInterface)
         self.fetchPosts()
         self.fetchUsers()
-        
-        
     }
     
-    var serviceInterface: ServiceInterface {
-        return (UIApplication.shared.delegate as! AppDelegate).serviceInterface
+    private var serviceInterface: ServiceInterface {
+        let si = ServiceInterface.sharedInstance
+        
+        return si
     }
+    private lazy var webServiceResolver = WebServiceResolver()
     
     private func fetchPosts() {
-        let url = URL(string: "https://jsonplaceholder.typicode.com/comments")!
+
+        //Build the request
+        let route = ServiceRoutes.JSONPlaceholder.comments
+        let url = self.webServiceResolver.url(forRoute: route)
         let request = DataRequest(url: url, method: .get)
-        let _ = self.serviceInterface.executeDataTask(forRequest: request) { (data, error, statusCode) in
-            if let t = [Post].initialize(jsonData: data) {
-                print("Item Count: \(t.count)")
-                print(t[0])
+        
+        //Make the call
+        let _ = self.serviceInterface.execute(request) { (result) in
+            switch result {
+            case .failure(let serviceError):
+                print("Service error occured \(serviceError.error?.localizedDescription ?? "No error description")")
+            case .success(let dataResponse):
+                if let t = [Post].initialize(jsonData: dataResponse.resposeBody) {
+                    print("Item Count: \(t.count)")
+                    print(t[0])
+                }
             }
         }
     }
-    
+
     private func fetchUsers() {
-        let url = URL(string: "https://jsonplaceholder.typicode.com/users")!
+        
+        //Build the request
+        let route = ServiceRoutes.JSONPlaceholder.users
+        let url = self.webServiceResolver.url(forRoute: route)
         let request = DataRequest(url: url, method: .get)
-        let _ = self.serviceInterface.executeDataTask(forRequest: request) { (data, error, statusCode) in
-            if let t = [User].initialize(jsonData: data) {
-                print("Item Count: \(t.count)")
-                print(t[0])
+        
+        //Make the call
+        let _ = self.serviceInterface.execute(request) { (result) in
+            switch result {
+            case .failure(let serviceError):
+                print("Service error occured \(serviceError.error?.localizedDescription ?? "No error description")")
+            case .success(let dataResponse):
+                if let t = [User].initialize(jsonData: dataResponse.resposeBody) {
+                    print("Item Count: \(t.count)")
+                    print(t[0])
+                }
             }
         }
     }
-    
 }
 

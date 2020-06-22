@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name             = 'Hellfire'
-    s.version          = '0.0.18'
+    s.version          = '0.1.0'
     s.summary          = 'Hellfire summary'
     
     # This description is used to generate tags and improve search results.
