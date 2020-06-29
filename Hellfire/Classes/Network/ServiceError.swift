@@ -10,11 +10,12 @@ import Foundation
 
 public class ServiceError: Error {
     
-    public init(request: URLRequest, error: Error?, statusCode: StatusCode, responseBody: Data?) {
+    public init(request: URLRequest, error: Error?, statusCode: StatusCode, responseBody: Data?, userCancelledRequest: Bool) {
         self.request = request
         self.error = error
         self.statusCode = statusCode
         self.responseBody = responseBody
+        self.userCancelledRequest = userCancelledRequest
     }
     
     ///The url for the service error.
@@ -28,4 +29,7 @@ public class ServiceError: Error {
     
     ///The response body for the erroring request.
     public let responseBody: Data?
+    
+    ///Returns true if the user cancelled the request.
+    public let userCancelledRequest: Bool
 }

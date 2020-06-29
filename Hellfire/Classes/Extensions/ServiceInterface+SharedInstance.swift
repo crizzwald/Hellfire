@@ -1,8 +1,9 @@
 //
 //  ServiceInterface+SharedInstance.swift
-//  Pods
+//  HellFire
 //
 //  Created by Ed Hellyer on 5/26/20.
+//  Copyright © 2020 Ed Hellyer. All rights reserved.
 //
 
 import Foundation

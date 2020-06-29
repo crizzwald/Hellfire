@@ -22,13 +22,3 @@ public struct HTTPHeader: Hashable {
     ///Gets the values of the HTTPHeder
     public let value: String
 }
-
-extension HTTPHeader: CustomStringConvertible, CustomDebugStringConvertible {
-    public var debugDescription: String {
-        return "{ name: \"\(self.name)\"  value:\"\(self.value)\" }"
-    }
-    
-    public var description: String {
-        return self.debugDescription
-    }
-}

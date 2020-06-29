@@ -10,16 +10,28 @@ import Foundation
 
 internal class RequestCollection {
 
-    private var serialMessageQueue: DispatchQueue
-    private var requests = [URLRequest: URLSessionTask]()
-    private var taskIndex = [RequestTaskIdentifier: TaskRequestPair]()
-
-    typealias TaskRequestPair = (task: URLSessionTask, request: URLRequest)
-
+    //Class setup
+    
     init() {
         let queueLabel = "ThreadSafeMessageQueue." + String.randomString(length: 12)
         self.serialMessageQueue = DispatchQueue(label: queueLabel)
     }
+
+    //Private API
+
+    //Queue used to ensure synchronous access to the 'requests' collection and the index 'taskIndex'
+    private var serialMessageQueue: DispatchQueue
+
+    //Type definition of Task and Request.
+    private typealias TaskRequestPair = (task: URLSessionTask, request: URLRequest)
+    
+    //Collection of concurrent requests in call
+    private var requests = [URLRequest: URLSessionTask]()
+    
+    //Index of the tasks
+    private var taskIndex = [RequestTaskIdentifier: TaskRequestPair]()
+    
+    ///Public API
     
     func removeTask(forRequest request: URLRequest) {
         self.serialMessageQueue.sync {
@@ -29,9 +41,9 @@ internal class RequestCollection {
         }
     }
 
-    func removeRequest(forTask task: URLSessionTask) {
+    func removeRequest(forTaskIdentifier taskIdentifier: RequestTaskIdentifier) {
         self.serialMessageQueue.sync {
-            if let key = self.taskIndex.removeValue(forKey: task.taskIdentifier) {
+            if let key = self.taskIndex.removeValue(forKey: taskIdentifier) {
                 let _ = self.requests.removeValue(forKey: key.request)
             }
         }
@@ -42,14 +54,6 @@ internal class RequestCollection {
             let _ = self.requests.updateValue(task, forKey: request)
             let _ = self.taskIndex.updateValue((task, request), forKey: task.taskIdentifier)
         }
-    }
-    
-    func taskRequestPair(forIdentifier identifier: RequestTaskIdentifier) -> TaskRequestPair? {
-        var taskRequestPair: TaskRequestPair? = nil
-        self.serialMessageQueue.sync {
-            taskRequestPair = self.taskIndex[identifier]
-        }
-        return taskRequestPair
     }
     
     func allTasks() -> [RequestTaskIdentifier] {

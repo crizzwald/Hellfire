@@ -11,7 +11,7 @@ import Foundation
 public typealias RequestTaskIdentifier = Int
 public typealias ReachabilityHandler = (ReachabilityStatus) -> Void
 public typealias ServiceErrorHandler = (ServiceError) -> Void
-public typealias TaskResult = (Result<DataResponse, ServiceError>) -> Void
+public typealias TaskResult = (RequestResult) -> Void
 
 //Only one instance per app should be created.  However, rather than trying to enforce this via a singleton, its up to the app developer when to create multiple instances.  But be aware that DiskCache is still shared between all instances.  Although a unique hash insertion key will be created, storage size will be shared.
 public class ServiceInterface {
@@ -54,9 +54,9 @@ public class ServiceInterface {
         return httpHeaders
     }
     
-    private func checkReponse(data: Data?, statusCode: StatusCode, error: Error?, fromRequest request: URLRequest) -> ServiceError? {
-        if HTTPCode.isOk(statusCode: statusCode) { return nil }
-        let serviceError = ServiceError(request: request, error: error, statusCode: statusCode, responseBody: data)
+    private func createServiceError(data: Data?, statusCode: StatusCode, error: Error?, request: URLRequest) -> ServiceError {
+        let requestCancelled = HTTPCode.wasRequestCancelled(statusCode: statusCode)
+        let serviceError = ServiceError(request: request, error: error, statusCode: statusCode, responseBody: data, userCancelledRequest: requestCancelled)
         self.serviceErrorHandler?(serviceError)
         return serviceError
     }
@@ -89,6 +89,26 @@ public class ServiceInterface {
         }
         return false
     }
+    
+    private func setupReachabilityManager(host: String) {
+        self.reachabilityManager?.stopListening()
+        self.reachabilityManager?.listener = nil
+        self.reachabilityManager = NetworkReachabilityManager(host: host)
+        self.reachabilityManager?.listener = { [weak self] status in
+            guard let strongSelf = self else { return }
+            switch status {
+            case .notReachable:
+                strongSelf.reachabilityHandler?(.notReachable)
+            case .unknown :
+                strongSelf.reachabilityHandler?(.unknown)
+            case .reachable(.ethernetOrWiFi):
+                strongSelf.reachabilityHandler?(.reachable(.wiFiOrEthernet))
+            case .reachable(.wwan):
+                strongSelf.reachabilityHandler?(.reachable(.cellular))
+            }
+        }
+        self.reachabilityManager?.startListening()
+    }
 
     //MARK: - Public API
     
@@ -118,25 +138,8 @@ public class ServiceInterface {
         }
         set {
             self.privateReachabilityHost = newValue
-            self.reachabilityManager?.stopListening()
-            self.reachabilityManager?.listener = nil
-            
-            if ((newValue ?? "").isEmpty == false && self.reachabilityHandler != nil) {
-                self.reachabilityManager = NetworkReachabilityManager(host: newValue!)
-                self.reachabilityManager?.listener = { [weak self] status in
-                    guard let strongSelf = self else { return }
-                    switch status {
-                    case .notReachable:
-                        strongSelf.reachabilityHandler?(.notReachable)
-                    case .unknown :
-                        strongSelf.reachabilityHandler?(.unknown)
-                    case .reachable(.ethernetOrWiFi):
-                        strongSelf.reachabilityHandler?(.reachable(.wiFiOrEthernet))
-                    case .reachable(.wwan):
-                        strongSelf.reachabilityHandler?(.reachable(.cellular))
-                    }
-                }
-                self.reachabilityManager?.startListening()
+            if let host = newValue, host.isEmpty == false {
+                self.setupReachabilityManager(host: host)
             }
         }
     }
@@ -152,7 +155,6 @@ public class ServiceInterface {
             guard let strongSelf = self else { return }
             
             let httpURLResponse = response as? HTTPURLResponse
-            let responseHeaders: [HTTPHeader] = strongSelf.responseHeaders(httpURLResponse)
             let statusCode = strongSelf.statusCodeForResponse(httpURLResponse, error: error)
             
             //If call was successful and we have data, store response in disk cache.
@@ -160,22 +162,21 @@ public class ServiceInterface {
                 strongSelf.diskCache.cache(data: responseData, forRequest: request)
             }
             
-            //Send back response headers (In the future the headers will be additionally included with the response.)
+            //Send back response headers to delegate.  (Headers will be additionally included with the DataResponse.)
+            let responseHeaders: [HTTPHeader] = strongSelf.responseHeaders(httpURLResponse)
             strongSelf.sessionDelegate?.responseHeaders(headers: responseHeaders, forRequest: request)
             
-            ///Check for error in the response.
-            let serviceError = strongSelf.checkReponse(data: data, statusCode: statusCode, error: error, fromRequest: urlRequest)
-            
-            //Remove request \ task from executing tasks collection
+            //Remove task from request collection
             strongSelf.requestCollection.removeTask(forRequest: urlRequest)
             
             //Call completion block
             DispatchQueue.main.async {
-                if serviceError != nil {
-                    completion(.failure(serviceError!))
-                } else {
-                    let dataResponse = DataResponse(responseHeaders: responseHeaders, resposeBody: data, statusCode: HTTPCode.ok.rawValue)
+                if HTTPCode.isOk(statusCode: statusCode) {
+                    let dataResponse = DataResponse(responseHeaders: responseHeaders, resposeBody: data, statusCode: statusCode)
                     completion(.success(dataResponse))
+                } else {
+                    let serviceError = strongSelf.createServiceError(data: data, statusCode: statusCode, error: error, request: urlRequest)
+                    completion(.failure(serviceError))
                 }
             }
         }
@@ -188,10 +189,7 @@ public class ServiceInterface {
     
     public func cancelRequest(taskIdentifier: RequestTaskIdentifier?) {
         guard let taskId = taskIdentifier else { return }
-        if let taskRequestPair = self.requestCollection.taskRequestPair(forIdentifier: taskId) {
-            taskRequestPair.task.cancel()
-            self.requestCollection.removeTask(forRequest: taskRequestPair.request)
-        }
+        self.requestCollection.removeRequest(forTaskIdentifier: taskId)
     }
     
     public func cancelAllCurrentRequests() {

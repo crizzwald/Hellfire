@@ -67,7 +67,7 @@ public enum HTTPCode: Int {
     }
     
     ///Returns true when the status code == -999, which is the frameworks custom status code for HTTPCode.userCancelledRequest.
-    public static func wasRequestCancelled(statusCode: StatusCode) -> Bool  {
+    internal static func wasRequestCancelled(statusCode: StatusCode) -> Bool  {
         return (statusCode == HTTPCode.userCancelledRequest.rawValue)
     }
 }
