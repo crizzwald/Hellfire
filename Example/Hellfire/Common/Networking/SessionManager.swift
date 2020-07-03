@@ -34,7 +34,7 @@ class SessionManager {
 extension SessionManager: ServiceInterfaceSessionDelegate {
 
     //Set the appropriate headers for dataRequest here.
-    func headerCollection(forRequest dataRequest: DataRequest) -> [HTTPHeader]? {
+    func headerCollection(forRequest dataRequest: NetworkRequest) -> [HTTPHeader]? {
         
         var headers: [HTTPHeader] = []
         
@@ -44,7 +44,7 @@ extension SessionManager: ServiceInterfaceSessionDelegate {
         return headers
     }
     
-    func responseHeaders(headers: [HTTPHeader], forRequest: DataRequest) {
+    func responseHeaders(headers: [HTTPHeader], forRequest: NetworkRequest) {
         //This demo parent app does nothing here... yet.
     }
 }

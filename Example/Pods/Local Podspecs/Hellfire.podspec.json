@@ -1,6 +1,6 @@
 {
   "name": "Hellfire",
-  "version": "0.0.17",
+  "version": "0.1.1",
   "summary": "Hellfire summary",
   "description": "Description of the Hellfire pod",
   "homepage": "https://github.com/ehellyer/Hellfire",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/ehellyer/Hellfire.git",
-    "tag": "0.0.17"
+    "tag": "0.1.1"
   },
   "platforms": {
     "ios": "10.0",

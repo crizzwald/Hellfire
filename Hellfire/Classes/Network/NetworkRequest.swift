@@ -1,5 +1,5 @@
 //
-//  DataRequest.swift
+//  NetworkRequest.swift
 //  HellFire
 //
 //  Created by Ed Hellyer on 11/01/17.
@@ -9,7 +9,7 @@
 import Foundation
 
 ///The basic request object supplying the minimal information for a network request.  Headers are set later by a delegate call to ServiceInterfaceSessionDelegate implemented by the application.
-public struct DataRequest {
+public struct NetworkRequest {
     
     public init(url: URL,
                 method: HTTPMethod,

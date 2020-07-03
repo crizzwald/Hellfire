@@ -3,7 +3,7 @@ This application makes use of the following third party libraries:
 
 ## Hellfire
 
-Copyright (c) 2017 Ed Hellyer <ehellyer@comcast.net>
+Copyright (c) 2017 Ed Hellyer <ejhellyer@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -28,7 +28,7 @@ class ViewController: UIViewController {
         //Build the request
         let route = ServiceRoutes.JSONPlaceholder.comments
         let url = self.webServiceResolver.url(forRoute: route)
-        let request = DataRequest(url: url, method: .get)
+        let request = NetworkRequest(url: url, method: .get)
         
         //Make the call
         let _ = self.serviceInterface.execute(request) { (result) in
@@ -36,7 +36,7 @@ class ViewController: UIViewController {
             case .failure(let serviceError):
                 print("Service error occured \(serviceError.error?.localizedDescription ?? "No error description")")
             case .success(let dataResponse):
-                if let t = [Post].initialize(jsonData: dataResponse.resposeBody) {
+                if let t = [Post].initialize(jsonData: dataResponse.body) {
                     print("Item Count: \(t.count)")
                     print(t[0])
                 }
@@ -49,7 +49,7 @@ class ViewController: UIViewController {
         //Build the request
         let route = ServiceRoutes.JSONPlaceholder.users
         let url = self.webServiceResolver.url(forRoute: route)
-        let request = DataRequest(url: url, method: .get)
+        let request = NetworkRequest(url: url, method: .get)
         
         //Make the call
         let _ = self.serviceInterface.execute(request) { (result) in
@@ -57,7 +57,7 @@ class ViewController: UIViewController {
             case .failure(let serviceError):
                 print("Service error occured \(serviceError.error?.localizedDescription ?? "No error description")")
             case .success(let dataResponse):
-                if let t = [User].initialize(jsonData: dataResponse.resposeBody) {
+                if let t = [User].initialize(jsonData: dataResponse.body) {
                     print("Item Count: \(t.count)")
                     print(t[0])
                 }
