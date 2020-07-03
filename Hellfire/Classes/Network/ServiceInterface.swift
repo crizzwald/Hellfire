@@ -13,7 +13,8 @@ public typealias ReachabilityHandler = (ReachabilityStatus) -> Void
 public typealias ServiceErrorHandler = (ServiceError) -> Void
 public typealias TaskResult = (RequestResult) -> Void
 
-//Only one instance per app should be created.  However, rather than trying to enforce this via a singleton, its up to the app developer when to create multiple instances.  But be aware that DiskCache is still shared between all instances.  Although a unique hash insertion key will be created, storage size will be shared.
+///Only one instance per app should be created.  However, rather than trying to enforce this via a singleton, its up to the app developer when to create multiple instances.
+///Be aware that DiskCache is shared between multiple ServiceInterface instances.  Although a unique hash insertion key will be created, storage size will be shared.
 public class ServiceInterface {
     
     //MARK: - Private API
@@ -148,6 +149,14 @@ public class ServiceInterface {
     
     public weak var sessionDelegate: ServiceInterfaceSessionDelegate?
 
+    ///Executes the network request asynchronously.
+    ///Calls back with cached response on same thread, in current call stack.
+    ///Calls back with network response by dispatching to the main thread.
+    ///Cancels the network request for the specified request task identifier.
+    ///
+    /// - Parameters:
+    ///     - request: The network request to be executed
+    ///     - completion: The completion function to be called with the response.
     public func execute(_ request: NetworkRequest, completion: @escaping TaskResult) -> RequestTaskIdentifier? {
 
         if hasCachedResponse(forRequest: request, completion: completion) { return nil }
@@ -189,15 +198,33 @@ public class ServiceInterface {
         return task.taskIdentifier
     }
     
+    ///Cancels the network request for the specified request task identifier.
+    ///
+    /// - Parameters:
+    ///     - taskIdentifier: Identifer for the network request.
     public func cancelRequest(taskIdentifier: RequestTaskIdentifier?) {
         guard let taskId = taskIdentifier else { return }
         self.requestCollection.removeRequest(forTaskIdentifier: taskId)
     }
     
+    ///Cancels all current network requests.
     public func cancelAllCurrentRequests() {
         let tasks = self.requestCollection.allTasks()
         tasks.forEach { (task) in
             self.cancelRequest(taskIdentifier: task)
         }
+    }
+    
+    ///Clears all cached data for any instance of ServiceInterface.
+    public func clearCache() {
+        self.diskCache.clearCache()
+    }
+    
+    ///Clears cached data for the specified cache policy type only
+    ///
+    /// - Parameters:
+    ///     - policyType: The cache bucket that is to be cleared.
+    public func clearCache(policyType: CachePolicyType) {
+        self.diskCache.clearCache(policyType: policyType)
     }
 }
