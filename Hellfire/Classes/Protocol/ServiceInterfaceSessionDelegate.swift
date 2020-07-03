@@ -20,5 +20,5 @@ public protocol ServiceInterfaceSessionDelegate: class {
 //Empty private protocol extension to make protocol methods optional for the delegate.
 public extension ServiceInterfaceSessionDelegate {
     func headerCollection(forRequest dataRequest: NetworkRequest) -> [HTTPHeader]? { return nil }
-    func responseHeaders(headers: [HTTPHeader]) {}
+    func responseHeaders(headers: [HTTPHeader], forRequest: NetworkRequest) {}
 }
