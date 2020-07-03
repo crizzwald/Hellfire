@@ -6,6 +6,10 @@
 //  Copyright © 2020 Ed Hellyer. All rights reserved.
 //
 
+/*
+Header default code taken from Alamofire, because it was a really smart idea of theirs to default some of the more commonly used headers.
+*/
+
 import Foundation
 
 extension HTTPHeader {

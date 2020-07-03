@@ -107,9 +107,9 @@ internal class DiskCache {
         return success
     }
     
-    private func key(forRequest request: DataRequest) -> String {
+    private func key(forRequest request: NetworkRequest) -> String {
         var httpBody = ""
-        if let bodyData = request.httpBody {
+        if let bodyData = request.body {
             httpBody = String.init(data: bodyData, encoding: String.Encoding.utf8) ?? ""
         }
         let url = request.url.absoluteString
@@ -162,7 +162,7 @@ internal class DiskCache {
     //MARK: - Public API
     
     ///Returns the data for the request.
-    internal func getCacheDataFor(request: DataRequest) -> Data? {
+    internal func getCacheDataFor(request: NetworkRequest) -> Data? {
         let policySetting = self.cachePolicies.policy(forType: request.cachePolicyType)
         let requestKey = self.key(forRequest: request)
         
@@ -179,7 +179,7 @@ internal class DiskCache {
     }
     
     ///Stores the data on disk for the request using the specified cache policy
-    internal func cache(data: Data, forRequest request: DataRequest) {
+    internal func cache(data: Data, forRequest request: NetworkRequest) {
         let policySetting = self.cachePolicies.policy(forType: request.cachePolicyType)
         if (data.count < 3) { return }
         let requestKey = self.key(forRequest: request)

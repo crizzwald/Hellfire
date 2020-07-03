@@ -11,14 +11,14 @@ import Foundation
 public protocol ServiceInterfaceSessionDelegate: class {
     
     ///Delegate implements this method and returns all required headers for the data request
-    func headerCollection(forRequest dataRequest: DataRequest) -> [HTTPHeader]?
+    func headerCollection(forRequest dataRequest: NetworkRequest) -> [HTTPHeader]?
     
     ///Send the response headers to the session delegate.
-    func responseHeaders(headers: [HTTPHeader], forRequest: DataRequest)
+    func responseHeaders(headers: [HTTPHeader], forRequest: NetworkRequest)
 }
 
 //Empty private protocol extension to make protocol methods optional for the delegate.
 public extension ServiceInterfaceSessionDelegate {
-    func headerCollection(forRequest dataRequest: DataRequest) -> [HTTPHeader]? { return nil }
+    func headerCollection(forRequest dataRequest: NetworkRequest) -> [HTTPHeader]? { return nil }
     func responseHeaders(headers: [HTTPHeader]) {}
 }

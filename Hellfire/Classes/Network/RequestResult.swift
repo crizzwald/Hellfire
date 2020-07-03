@@ -8,6 +8,6 @@
 import Foundation
 
 public enum RequestResult {
-    case success(DataResponse)
+    case success(NetworkResponse)
     case failure(ServiceError)
 }

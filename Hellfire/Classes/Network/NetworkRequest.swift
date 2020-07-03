@@ -15,13 +15,13 @@ public struct NetworkRequest {
                 method: HTTPMethod,
                 cachePolicyType: CachePolicyType = .doNotCache,
                 timeoutInterval: TimeInterval = TimeInterval(30),
-                httpBody: Data? = nil,
+                body: Data? = nil,
                 contentType: String = "application/json") {
         self.url = url
         self.method = method
         self.cachePolicyType = cachePolicyType
         self.timeoutInterval = timeoutInterval
-        self.httpBody = httpBody
+        self.body = body
         self.contentType = contentType
     }
     
@@ -38,7 +38,7 @@ public struct NetworkRequest {
     public let timeoutInterval: TimeInterval
     
     /// Gets the Request http body
-    public let httpBody: Data?
+    public let body: Data?
     
     /// Gets the content type of the request body.
     public let contentType: String

@@ -61,10 +61,10 @@ public class ServiceInterface {
         return serviceError
     }
     
-    private func urlRequest(fromDataRequest request: DataRequest) -> URLRequest {
+    private func urlRequest(fromNetworkRequest request: NetworkRequest) -> URLRequest {
         var urlRequest = URLRequest(url: request.url)
         urlRequest.httpMethod = request.method.name
-        urlRequest.httpBody = request.httpBody
+        urlRequest.httpBody = request.body
         urlRequest.timeoutInterval = request.timeoutInterval
         
         //Ask session delegate for any headers for this request.
@@ -77,11 +77,13 @@ public class ServiceInterface {
         return urlRequest
     }
     
-    private func hasCachedResponse(forRequest request: DataRequest, completion: @escaping TaskResult) -> Bool {
+    private func hasCachedResponse(forRequest request: NetworkRequest, completion: @escaping TaskResult) -> Bool {
         if request.cachePolicyType != CachePolicyType.doNotCache {
             if let response = self.diskCache.getCacheDataFor(request: request) {
                 DispatchQueue.main.async {
-                    let dataResponse = DataResponse(responseHeaders: [], resposeBody: response, statusCode: HTTPCode.ok.rawValue)
+                    let dataResponse = NetworkResponse(headers: [HTTPHeader(name: "CachedResponse", value: "true")],
+                                                       body: response,
+                                                       statusCode: HTTPCode.ok.rawValue)
                     completion(.success(dataResponse))
                 }
                 return true
@@ -146,11 +148,11 @@ public class ServiceInterface {
     
     public weak var sessionDelegate: ServiceInterfaceSessionDelegate?
 
-    public func execute(_ request: DataRequest, completion: @escaping TaskResult) -> RequestTaskIdentifier? {
+    public func execute(_ request: NetworkRequest, completion: @escaping TaskResult) -> RequestTaskIdentifier? {
 
         if hasCachedResponse(forRequest: request, completion: completion) { return nil }
         
-        let urlRequest = self.urlRequest(fromDataRequest: request)
+        let urlRequest = self.urlRequest(fromNetworkRequest: request)
         let task = self.session.dataTask(with: urlRequest) { [weak self] data, response, error in
             guard let strongSelf = self else { return }
             
@@ -162,7 +164,7 @@ public class ServiceInterface {
                 strongSelf.diskCache.cache(data: responseData, forRequest: request)
             }
             
-            //Send back response headers to delegate.  (Headers will be additionally included with the DataResponse.)
+            //Send back response headers to delegate.  (Headers will be additionally included with the NetworkResponse.)
             let responseHeaders: [HTTPHeader] = strongSelf.responseHeaders(httpURLResponse)
             strongSelf.sessionDelegate?.responseHeaders(headers: responseHeaders, forRequest: request)
             
@@ -172,7 +174,7 @@ public class ServiceInterface {
             //Call completion block
             DispatchQueue.main.async {
                 if HTTPCode.isOk(statusCode: statusCode) {
-                    let dataResponse = DataResponse(responseHeaders: responseHeaders, resposeBody: data, statusCode: statusCode)
+                    let dataResponse = NetworkResponse(headers: responseHeaders, body: data, statusCode: statusCode)
                     completion(.success(dataResponse))
                 } else {
                     let serviceError = strongSelf.createServiceError(data: data, statusCode: statusCode, error: error, request: urlRequest)

@@ -10,10 +10,10 @@ import Foundation
 ///Describes the successful response of an HTTP \ HTTPS call to a server
 public struct NetworkResponse {
     
-    ///Gets the headers from the server response.
-    public let responseHeaders: [HTTPHeader]
+    ///Gets the response headers from the server.
+    public let headers: [HTTPHeader]
 
-    ///Gets the body from the server response
+    ///Gets the response body from the server.
     public let body: Data?
     
     ///Gets the HTTP result status code
