@@ -69,11 +69,17 @@ public class ServiceInterface {
         urlRequest.timeoutInterval = request.timeoutInterval
         
         //Ask session delegate for any headers for this request.
-        if let headers = self.sessionDelegate?.headerCollection(forRequest: request) {
-            headers.forEach({ (header) in
-                urlRequest.setValue(header.value, forHTTPHeaderField: header.name)
-            })
+        var headers: [HTTPHeader] = self.sessionDelegate?.headerCollection(forRequest: request) ?? []
+        
+        //Add diagnostic and trouble shooting correlation Id
+        if (headers.filter { $0.name == "X-Correlation-ID" }).isEmpty {
+            headers.append(HTTPHeader(name: "X-Correlation-ID", value: UUID().uuidString))
         }
+        
+        //Add headers to URLRequest
+        headers.forEach({ (header) in
+            urlRequest.setValue(header.value, forHTTPHeaderField: header.name)
+        })
         
         return urlRequest
     }

@@ -52,25 +52,21 @@ public enum CachePolicyType {
         case .doNotCache: return 0
         }
     }
-    
-    var typeName: String {
-        switch self {
-        case .hour: return "HourCache"
-        case .fourHours: return "FourHourCache"
-        case .day: return "DayCache"
-        case .week: return "WeekCache"
-        case .month: return "MonthCache"
-        case .untilSpaceNeeded: return "UntilSpaceNeeded"
-        case .doNotCache: return "DoNotCache"
-        }
-    }
 }
 
-public class CachePolicySetting {
-
-    private let policyType: CachePolicyType
+internal class CachePolicySetting: Hashable {
     
-    public init(policyType:CachePolicyType) {
+    static func == (lhs: CachePolicySetting, rhs: CachePolicySetting) -> Bool {
+        return lhs.policyType == rhs.policyType
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(self.policyType)
+    }
+    
+    let policyType: CachePolicyType
+    
+    init(policyType:CachePolicyType) {
 
         self.policyType = policyType
         self.bytesUsed = 0
@@ -80,36 +76,36 @@ public class CachePolicySetting {
         self.rootPath = cachePath.appendingPathComponent(appName)
     }
 
-    public let rootPath: URL
+    let rootPath: URL
 
-    public var folderURL: URL {
+    var folderURL: URL {
         get {
             return self.rootPath.appendingPathComponent(self.policyType.folderName)
         }
     }
     
-    public var bytesUsed: UInt64
+    var bytesUsed: UInt64
     
-    public var ttlInSeconds: UInt32 {
+    var ttlInSeconds: UInt32 {
         get {
             return self.policyType.ttlInSeconds
         }
     }
     
-    public var maxByteSize: UInt64 {
+    var maxByteSize: UInt64 {
         get {
             return self.policyType.maxByteSize
         }
     }
     
-    public var typeName: String {
+    var cachePolicy: CachePolicyType {
         get {
-            return self.policyType.typeName
+            return self.policyType
         }
     }
 }
 
-public class CachePolicy {
+internal class CachePolicy {
     
     private let policies: [CachePolicySetting] = [CachePolicySetting.init(policyType: CachePolicyType.doNotCache),
                                                   CachePolicySetting.init(policyType: CachePolicyType.hour),
@@ -119,13 +115,13 @@ public class CachePolicy {
                                                   CachePolicySetting.init(policyType: CachePolicyType.month),
                                                   CachePolicySetting.init(policyType: CachePolicyType.untilSpaceNeeded)]
     
-    public func policy(forType policyType:CachePolicyType) -> CachePolicySetting {
-        let setting = self.policies.first(where: { $0.typeName == policyType.typeName })
+    func policy(forType policyType:CachePolicyType) -> CachePolicySetting {
+        let setting = self.policies.first(where: { $0.policyType == policyType })
         //Force unwrap because this should always work.  If it doesn't work, you probably forgot to add the setting to the policies array.
         return setting!
     }
     
-    public func allPolicies() -> [CachePolicySetting] {
+    func allPolicies() -> [CachePolicySetting] {
         return self.policies
     }
 }

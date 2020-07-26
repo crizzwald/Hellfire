@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     
     private var serviceInterface: ServiceInterface {
         let si = ServiceInterface.sharedInstance
-        
+        si.sessionDelegate = self
         return si
     }
     private lazy var webServiceResolver = WebServiceResolver()
@@ -66,3 +66,11 @@ class ViewController: UIViewController {
     }
 }
 
+extension ViewController: ServiceInterfaceSessionDelegate {
+    
+    func headerCollection(forRequest dataRequest: NetworkRequest) -> [HTTPHeader]? {
+        let headers = [HTTPHeader.defaultUserAgent, HTTPHeader.defaultAcceptLanguage]
+        return headers
+    }
+    
+}
