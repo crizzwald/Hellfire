@@ -8,8 +8,8 @@
 
 Pod::Spec.new do |s|
     s.name             = 'Hellfire'
-    s.version          = '0.1.5'
-    s.summary          = 'Hellfire summary'
+    s.version          = '0.1.6'
+    s.summary          = 'Hellfire Network Lib'
     
     # This description is used to generate tags and improve search results.
     #   * Think: What does it do? Why did you write it? What is the focus?
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
     #   * Write the description between the DESC delimiters below.
     #   * Finally, don't worry about the indent, CocoaPods strips it!
     
-    s.description      = 'Description of the Hellfire pod'
+    s.description      = 'Hellfire is a lightweight and easy to use network lib that supports JSON serialization on complex custom types, optional/configurable response caching and reachability.'
     
     s.homepage         = 'https://github.com/ehellyer/Hellfire'
     # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
