@@ -1,5 +1,5 @@
 PODS:
-  - Hellfire (0.1.1)
+  - Hellfire (0.1.7)
 
 DEPENDENCIES:
   - Hellfire (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Hellfire: 6e5b18e00fdbb54d29127425919dda4a3f7c30f8
+  Hellfire: 1b828d58b91d942881cfa218e3c82ec671f67440
 
 PODFILE CHECKSUM: 6819bf4282a40e062a7e10bca4b1bfcaf84a20c1
 
